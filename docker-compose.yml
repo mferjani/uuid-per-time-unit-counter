@@ -1,0 +1,44 @@
+version: "3.7"
+services:
+
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    hostname: zookeeper
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.4.0
+    command: [start-kafka.sh]
+    ports:
+      - "9092:9092"
+    hostname: kafka
+    environment:
+      KAFKA_CREATE_TOPICS: "mytopic:1:1"
+      KAFKA_ADVERTISED_HOST_NAME: localhost # docker-machine ip
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_PORT: 9092
+    volumes:
+      - kafka:/var/run/docker.sock
+    depends_on:
+      - "zookeeper"
+
+  uuid-counter:
+    build: .
+    container_name: "uuid-counter-app"
+    networks:
+      - uuid-counter-network
+    volumes:
+      - "./draft:/usr/app/draft"
+      - "./bin:/usr/app/bin"
+    env_file: docker.env
+    depends_on:
+      - "kafka"
+
+volumes:
+  kafka:
+
+networks:
+  uuid-counter-network:
+    name: uuid-counter-network
