@@ -15,26 +15,25 @@ services:
       - "9092:9092"
     hostname: kafka
     environment:
-      KAFKA_CREATE_TOPICS: "mytopic:1:1"
+      KAFKA_CREATE_TOPICS: "mytopic:1:1,mySmalltopic:1:1"
       KAFKA_ADVERTISED_HOST_NAME: localhost # docker-machine ip
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_PORT: 9092
     volumes:
       - kafka:/var/run/docker.sock
+      - "./data:/data"
+
     depends_on:
       - "zookeeper"
 
   uuid-counter:
     build: .
     container_name: "uuid-counter-app"
-    networks:
-      - uuid-counter-network
     volumes:
-      - "./draft:/usr/app/draft"
-      - "./bin:/usr/app/bin"
-    env_file: docker.env
+      - "./data:/usr/app/data"
     depends_on:
       - "kafka"
+    command: tail -f
 
 volumes:
   kafka:

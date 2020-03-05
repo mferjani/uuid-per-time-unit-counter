@@ -1,5 +1,5 @@
+import sys
 import json
-import pandas as pd
 from kafka import KafkaConsumer
 from datetime import datetime
 
@@ -17,19 +17,7 @@ def process_kafka_message(message: str):
     return uid, dt_object
 
 
-def process_data_chunk(ts_list, uid_list):
-    """Process the two lists using pandas groupby and nunique functions
-
-    :param ts_list: list of timestamps
-    :param uid_list: list of uids
-    :return: series object with the number of unique users per timeUnit (minute, hour, day, ...)
-    """
-    df = pd.DataFrame({'ts': ts_list, 'uid': uid_list})
-    series = df.groupby('ts').nunique()['uid']
-    return series
-
-
-def consume(topic: str):
+def consume(topic: str, host: str):
     """Consume the stream from a topic
         process data_chunks per time_unit
         and print results as soon as they are calculated
@@ -40,13 +28,14 @@ def consume(topic: str):
     # Initialize a consumer
     consumer = KafkaConsumer(topic,
                              group_id=None,
-                             bootstrap_servers=['localhost:9092'],
-                             auto_offset_reset='earliest',
-                             consumer_timeout_ms=5000)
+                             bootstrap_servers=[f'{host}:9092'],
+                             auto_offset_reset='earliest')
 
     # Columns : lists used to store data of single chunks sequentially
-    ts_list = []
-    uid_list = []
+    uid_set = set()
+
+    # Variable used for chunks : assuming data is ordered by timestamp
+    current_time = None
 
     # Loop on the stream
     for message in consumer:
@@ -55,17 +44,24 @@ def consume(topic: str):
         except Exception as e:
             print(e)
 
-        # Feed columns
-        ts_list.append(dt_object.strftime("%m-%d-%YT%H:%M"))
-        uid_list.append(uid)
+        if current_time != dt_object.strftime("%m-%d-%YT%H:%M"):
+            if current_time is None:
+                pass
+            else:
+                # process this chunk of data
+                print(f"{current_time}\n\t{len(uid_set)}")
+                # Clear set for next chunk
+                uid_set.clear()
+            current_time = dt_object.strftime("%m-%d-%YT%H:%M")
 
-    result = process_data_chunk(ts_list, uid_list)
-    print(result)
+        # Feed the set
+        uid_set.add(uid)
+
     consumer.close()
 
 
 if __name__ == "__main__":
-    # myTopic = sys.argv[1]
-    myTopic = "mySmallTopic"
+    host = sys.argv[1]
+    myTopic = sys.argv[2]
     print("Start consuming !!!!!!")
-    consume(myTopic)
+    consume(myTopic, host)
