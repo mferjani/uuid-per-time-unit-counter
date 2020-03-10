@@ -1,9 +1,10 @@
-## Documentation
+Introduction
+============
 
-https://github.com/mferjani/uuid-per-time-unit-counter.git
 
 
-## Hypotesis & assumptions :
+Hypotesis & assumptions 
+=======================
 
 - Data is ordered by timestamp
 - Only one partition
@@ -20,7 +21,9 @@ we resume
 - the results should be forwarded to a new kafka topic (again as json.) choose a suitable structure.
 ==> Use the producer
 
-## Useful Commands  :
+Useful Commands
+---------------
+
 
 # Starting zookeeper :
 zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties
@@ -42,12 +45,15 @@ kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 
 # List topics :
 kafka-topics.sh --list --bootstrap-server localhost:9092
 
-# Generate some data
+Generate some data
+------------------
+
 app/bin/data-generator-osx -c 100000 -r 100 -n 10000 -o data/mystream.json
 
 app/bin/data-generator-osx -c 10000 -r 100 -n 1000 -o data/mySmallstream.json
 
-# Populate the topic with data
+Populate the topic with data
+----------------------------
 
 kafka-console-producer.sh \
   --broker-list localhost:9092 \
@@ -58,22 +64,31 @@ kafka-console-producer.sh \
   --broker-list localhost:9092 \
   --topic mySmalltopic < /data/mySmallstream.json
 
-# Consume the topic
+
+Consume the topic
+-----------------
+
 kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 \
   --topic mySmalltopic --from-beginning
 
 
 
-# Consume the topic with python code
+Consume the topic with python code
+---------------------------------
+
 from kafka import KafkaConsumer
+
 consumer = KafkaConsumer('mySmalltopic',group_id=None,bootstrap_servers=['alpic_kafka_1:9092'],auto_offset_reset='earliest')
+
 consumer.topics()
+
 msg = consumer.poll(1.0)
 
 
 
-# Usin jq tool with data generator
+Using jq tool with data generator
+---------------------------------
 
 app/bin/data-generator-osx -c 10 | jq -c "{ts, uid}"
 
@@ -90,9 +105,21 @@ app/bin/data-generator-osx -c 10 | jq -c "{ts, uid}"
 
 
 
-## Useful links
+Usefull Links
+=============
 
-https://success.docker.com/article/getting-started-with-kafka
+`Docker <https://success.docker.com/article/getting-started-with-kafka>`_
+
+`Kafka Docker <https://hub.docker.com/r/wurstmeister/kafka/>`_
+
+
+Alternative solutions
+=====================
+
+`Kafka Streams <https://www.confluent.io/blog/introducing-kafka-streams-stream-processing-made-simple/>`_
+
+`Spark streaming <https://spark.apache.org/docs/2.2.0/structured-streaming-kafka-integration.html>`_
+
 
 
 
