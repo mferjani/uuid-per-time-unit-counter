@@ -1,15 +1,14 @@
 Introduction
 ============
 
-
+This documentation is still 'IN PROGRESS' and will be updated ASAP.
+The challenge 'README file' is really interesting and challenging and will help understand kafka and how to use it with docker.
 
 Hypotesis & assumptions 
 =======================
 
 - Data is ordered by timestamp
 - Only one partition
-
-
 - You can assume that 99.9% of the frames arrive with a maximum latency of 5 seconds.
     ==>
     before processing a chunk we store the new data in a tmp_new_ds during 5 secs
@@ -18,7 +17,7 @@ Hypotesis & assumptions
     we clear current_chunk_ds and move tmp_new_ds to it
     we resume
 
-- the results should be forwarded to a new kafka topic (again as json.) choose a suitable structure.
+- The results should be forwarded to a new kafka topic (again as json.) choose a suitable structure.
     ==> 
     Use the producer
 
