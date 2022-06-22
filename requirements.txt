@@ -1,2 +1,2 @@
 kafka-python==1.4.7
-numpy==1.18.1
+numpy==1.22.0
