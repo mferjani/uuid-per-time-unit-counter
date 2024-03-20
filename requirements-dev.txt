@@ -2,7 +2,7 @@
 
 pylint==2.3.1
 pandas==0.24.2
-black==19.3b0
+black==24.3.0
 pytest==4.3.1
 pytest-cov==2.6.1
 
